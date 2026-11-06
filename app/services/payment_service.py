@@ -50,7 +50,6 @@ def purchase(db: Session, ad_id: int, buyer_id: int):
         amount = _money(ad.price)
         seller_id = ad.owner_id
 
-        # Условное списание защищает от отрицательного баланса.
         debit = db.execute(
             update(User)
             .where(User.id == buyer_id, User.balance >= amount)
@@ -62,7 +61,6 @@ def purchase(db: Session, ad_id: int, buyer_id: int):
                 raise HTTPException(404, "Покупатель не найден")
             raise HTTPException(400, "Недостаточно средств на балансе")
 
-        # Условное обновление не позволяет оплатить одно объявление дважды.
         claim = db.execute(
             update(Ad)
             .where(Ad.id == ad_id, Ad.is_active.is_(True))
